@@ -1,0 +1,12 @@
+# Ignore local config containing secrets
+config.py
+
+# Byte-compiled / cache
+__pycache__/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+.venv/
+
+dataset/
