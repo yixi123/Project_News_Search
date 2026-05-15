@@ -327,7 +327,7 @@ const App = () => {
 
     // Replace this string with your Ngrok or Cloudflare Tunnel URL when deploying.
     // e.g., const API_BASE_URL = "https://1234-abcd.ngrok-free.app";
-    const API_BASE_URL = " https://situation-degrease-flavorful.ngrok-free.dev";
+    const API_BASE_URL = "https://situation-degrease-flavorful.ngrok-free.dev";
     const eventSource = new EventSource(`${API_BASE_URL}/api/news?query=${encodeURIComponent(searchQuery)}`);
     
     // We need to deduplicate events if we are resuming, because the server replays all events.
