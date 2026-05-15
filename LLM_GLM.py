@@ -219,7 +219,6 @@ def glm_preset_chat(messages: list) -> dict:
                 # Yield timeline events
                 for event in parsed_data.get("timeline", []):
                     yield event
-                    time.sleep(0.5)  # Simulate delay between events
         return generater()
     else: 
         # 1. Start the raw LLM stream (ensure thinking is disabled for pure JSON speed)

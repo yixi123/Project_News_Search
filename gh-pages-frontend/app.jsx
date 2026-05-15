@@ -325,7 +325,10 @@ const App = () => {
     setIsTracing(true);
     setProgressMsg(isResume ? "Resuming trace..." : "Connecting to server...");
 
-    const eventSource = new EventSource(`/api/news?query=${encodeURIComponent(searchQuery)}`);
+    // Replace this string with your Ngrok or Cloudflare Tunnel URL when deploying.
+    // e.g., const API_BASE_URL = "https://1234-abcd.ngrok-free.app";
+    const API_BASE_URL = " https://situation-degrease-flavorful.ngrok-free.dev";
+    const eventSource = new EventSource(`${API_BASE_URL}/api/news?query=${encodeURIComponent(searchQuery)}`);
     
     // We need to deduplicate events if we are resuming, because the server replays all events.
     // An easy way is to clear the timeline right as we receive the first actual event from the server.
