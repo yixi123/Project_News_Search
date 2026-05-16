@@ -328,48 +328,85 @@ const App = () => {
     // Replace this string with your Ngrok or Cloudflare Tunnel URL when deploying.
     // e.g., const API_BASE_URL = "https://1234-abcd.ngrok-free.app";
     const API_BASE_URL = "https://situation-degrease-flavorful.ngrok-free.dev";
-    const eventSource = new EventSource(`${API_BASE_URL}/api/news?query=${encodeURIComponent(searchQuery)}`);
     
     // We need to deduplicate events if we are resuming, because the server replays all events.
     // An easy way is to clear the timeline right as we receive the first actual event from the server.
     let hasClearedForReplay = !isResume; 
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "progress") {
-          setProgressMsg(data.message);
-        } else {
-          data.id = `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-          setTimeline(prev => {
-            // First time we get an event on this connection, if it's a resume replay, clear old items
-            if (!hasClearedForReplay) {
-              hasClearedForReplay = true;
-              return [data];
-            }
-            return [...(Array.isArray(prev) ? prev : []), data];
-          });
+    // Built-in EventSource doesn't support custom headers (like ngrok-skip-browser-warning).
+    // So we use standard fetch() and manually parse the streamed Server-Sent Events.
+    const abortController = new AbortController();
+
+    fetch(`${API_BASE_URL}/api/news?query=${encodeURIComponent(searchQuery)}`, {
+      method: "GET",
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+        "Accept": "text/event-stream"
+      },
+      signal: abortController.signal
+    })
+    .then(async (response) => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          setIsLoading(false);
+          setIsTracing(false);
+          break;
         }
-      } catch (err) {
-        console.error("Error parsing streaming data", err);
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        // Keep the last incomplete line in the buffer
+        buffer = lines.pop();
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+
+          if (line.startsWith("event: close")) {
+            abortController.abort();
+            setIsLoading(false);
+            setIsTracing(false);
+          } else if (line.startsWith("data: ")) {
+            const dataStr = line.substring(6).trim();
+            if (!dataStr || dataStr === "{}") continue;
+
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.type === "progress") {
+                setProgressMsg(data.message);
+              } else {
+                data.id = `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                setTimeline(prev => {
+                  if (!hasClearedForReplay) {
+                    hasClearedForReplay = true;
+                    return [data];
+                  }
+                  return [...(Array.isArray(prev) ? prev : []), data];
+                });
+              }
+            } catch (err) {
+              console.error("Error parsing streaming data", err);
+            }
+          }
+        }
       }
-    };
-
-    eventSource.addEventListener('close', () => {
-      eventSource.close();
-      setIsLoading(false);
-      setIsTracing(false);
-    });
-
-    eventSource.onerror = (err) => {
-      eventSource.close();
+    })
+    .catch((err) => {
+      if (err.name === "AbortError") return; // we aborted the fetch intentionally
+      console.error(err);
       setIsLoading(false);
       setIsTracing(false);
       setTimeline(prev => {
         if (!prev || prev.length === 0) setError("Failed to fetch data or connection closed.");
         return prev;
       });
-    };
+    });
   };
 
   // If there's no data initialized but we just landed, we won't show anything 
