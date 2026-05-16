@@ -236,15 +236,37 @@ def glm_preset_chat(messages: list) -> dict:
         return event_generator
 
 
+def get_rejection_message(error_code: str, corrected_query: str | None = None) -> str:
+    messages = {
+        "GIBBERISH": "I didn't quite catch that. Please search for a specific news topic, company, or event.",
+        "CONVERSATIONAL": "I'm a timeline generator, not a chatbot! Please enter a specific news event you'd like to explore.",
+        "INJECTION": "Invalid search query detected. Please search for a standard news topic.",
+        "OUT_OF_BOUNDS": "My database currently only covers events between 2016 and 2026. Please search for a more recent topic!",
+        "INVALID_EVENT": "I can only generate timelines for news events, public figures, or companies. Try searching for something like 'SpaceX' or 'OpenAI'.",
+        "MISSPELL": f"Did you mean '{corrected_query}'?"
+    }
+    return messages.get(error_code, "Please search for a specific, modern news event.")
+
+
 def bouncer_preset_chat(user_query: str) -> dict:
+    start_time = time.time()
     bouncer_messages = generate_bouncer_prompt(user_query)
     bouncer_data = {}
-    if os.path.exists(f"{LOG_DIR}/bouncer.json"):
-        with open(f"{LOG_DIR}/bouncer.json", "r", encoding="utf-8") as f:
+    bouncer_json_path = os.path.join(LOG_DIR, "bouncer.json")
+    bouncer_log_path = os.path.join(LOG_DIR, "bouncer_log.jsonl")
+
+    # Load cached bouncer responses if present
+    if os.path.exists(bouncer_json_path):
+        with open(bouncer_json_path, "r", encoding="utf-8") as f:
             bouncer_data = json.load(f)
+
+    # If cached, return cached response (do not log cached hits)
     if user_query in bouncer_data:
         time.sleep(1.5)  # Simulate some latency even for cached results
+        bouncer_data[user_query]["rejection_reason"] = get_rejection_message(bouncer_data[user_query].get("error_code", ""), corrected_query=bouncer_data[user_query].get("corrected_query", None))
         return bouncer_data[user_query]
+
+    # Not cached: call the model
     response = chat(
         messages=bouncer_messages,
         model=MODEL_BOUNCER,
@@ -263,15 +285,53 @@ def bouncer_preset_chat(user_query: str) -> dict:
             content = code_block_match.group(1)
         response_dict = json.loads(content)
     except (json.JSONDecodeError, IndexError) as e:
-        print(content)
+        print(content if 'content' in locals() else '')
         print(f"Error parsing bouncer response: {e}")
         response_dict = {
             "is_valid": False,
-            "rejection_reason": "Sorry, I couldn't understand your query. Please try a different topic."
+            "error_code": "UNKNOWN"
         }
+
+    # Save the parsed bouncer response cache
     bouncer_data[user_query] = response_dict
-    with open(f"{LOG_DIR}/bouncer.json", "w", encoding="utf-8") as f:
+    with open(bouncer_json_path, "w", encoding="utf-8") as f:
         json.dump(bouncer_data, f, indent=2)
+
+    # Build and append log entry
+    end_time = time.time()
+    total_latency = end_time - start_time
+    ttft = total_latency
+    final_usage = getattr(response, "usage", None)
+    prompt_tokens = getattr(final_usage, "prompt_tokens", 0) if final_usage else 0
+    completion_tokens = getattr(final_usage, "completion_tokens", 0) if final_usage else 0
+    total_tokens = getattr(final_usage, "total_tokens", 0) if final_usage else 0
+    tps = completion_tokens / total_latency if total_latency > 0 else 0
+    finish_reason = None
+    try:
+        finish_reason = response.choices[0].finish_reason
+    except Exception:
+        finish_reason = None
+
+    log_entry = {
+        "query": user_query,
+        "Timestamp": {
+            "start_time": datetime.fromtimestamp(start_time).isoformat(),
+            "completion_time": datetime.fromtimestamp(end_time).isoformat()
+        },
+        "Userinfo": "local_script_execution",
+        "Prompt Tokens": prompt_tokens,
+        "Completion Tokens": completion_tokens,
+        "Total Tokens": total_tokens,
+        "Cost": 0,
+        "Time to First Token (TTFT)": ttft,
+        "Tokens Per Second (TPS)": tps,
+        "Total Latency": total_latency,
+        "Finish Reason": finish_reason or ""
+    }
+
+    with open(bouncer_log_path, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(log_entry, ensure_ascii=False, indent=2) + "\n")
+    response_dict["rejection_reason"] = get_rejection_message(response_dict.get("error_code", ""), corrected_query=response_dict.get("corrected_query", None))
     return response_dict
 
 

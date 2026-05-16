@@ -1,5 +1,5 @@
 import hashlib
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, send_from_directory
 import json
 import os
 import sys
@@ -23,7 +23,10 @@ CORS(app, resources={r"/api/*": {"origins": "*", "allow_headers": ["ngrok-skip-b
 
 # --- Setup Daily Action Logger ---
 LOGS_DIR = os.path.join(BASE_DIR, 'logs_action')
+FEEDBACK_DIR = os.path.join(BASE_DIR, 'feedback')
+IMG_DIR = os.path.join(BASE_DIR, 'img')
 os.makedirs(LOGS_DIR, exist_ok=True)
+os.makedirs(FEEDBACK_DIR, exist_ok=True)
 
 class DailyLogHandler(logging.FileHandler):
     def __init__(self):
@@ -57,6 +60,32 @@ def log_event(level, msg, context, ip="System", perf_ms=None, error=None):
         action_logger.error(log_str)
     elif level == "FATAL":
         action_logger.critical(log_str)
+
+
+def save_feedback_entry(payload, client_ip, user_agent):
+    feedback_text = str(payload.get("message", "")).strip()
+    rating = payload.get("rating")
+    page = str(payload.get("page", "")).strip()
+    query = str(payload.get("query", "")).strip()
+
+    if not feedback_text:
+        raise ValueError("Feedback message cannot be empty.")
+
+    record = {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "ip": client_ip,
+        "user_agent": user_agent,
+        "message": feedback_text,
+        "rating": rating,
+        "page": page,
+        "query": query,
+    }
+
+    feedback_file = os.path.join(FEEDBACK_DIR, f"{datetime.now().strftime('%Y-%m-%d')}.jsonl")
+    with open(feedback_file, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False, indent=2) + "\n")
+
+    return record
 
 # --- Background Job Manager ---
 # This decouples the LLM processing from the HTTP request, so if the browser reloads
@@ -140,6 +169,10 @@ def index():
     log_event("INFO", "Accessed homepage", "index", ip=client_ip)
     return render_template('index.html')
 
+@app.route('/img/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(IMG_DIR, filename)
+
 @app.route('/api/news')
 def get_news():
     query = request.args.get('query', '')
@@ -221,6 +254,19 @@ def get_news():
                 break
 
     return Response(generate(), mimetype='text/event-stream')
+
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    client_ip = request.remote_addr
+    try:
+        payload = request.get_json(silent=True) or {}
+        record = save_feedback_entry(payload, client_ip, request.headers.get('User-Agent', 'unknown'))
+        log_event("INFO", "Feedback submitted", "submit_feedback", ip=client_ip)
+        return Response(json.dumps({"ok": True, "record": record}), mimetype='application/json')
+    except Exception as e:
+        error_details = traceback.format_exc()
+        log_event("ERROR", f"Failed to save feedback: {str(e)}", "submit_feedback", ip=client_ip, error=error_details)
+        return Response(json.dumps({"ok": False, "error": str(e)}), status=400, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host="0.0.0.0")
