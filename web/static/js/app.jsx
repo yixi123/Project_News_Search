@@ -583,12 +583,8 @@ const App = () => {
       {/* First-Time User Introduction */}
       {!isLoading && (!viewTimeline || !timeline || timeline.length === 0) && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
         <div id="intro" className="max-w-4xl mx-auto mt-16 px-4 md:px-0 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] scroll-mt-24">
-          <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-8 md:p-12 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
-            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-md text-white">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3L22 4" />
-              </svg>
-            </div>
+          <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-12 pt-6 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
+            <img src="img/NewsTrace_icon3.png" alt="NewsTrace" className="w-32 h-32 mx-auto flex items-center justify-center" />
             <h2 className={`text-3xl md:text-4xl font-extrabold tracking-tight mb-4 ${isDarkMode ? 'text-slate-50' : 'text-slate-900'}`}>
               Welcome to NewsTrace
             </h2>
