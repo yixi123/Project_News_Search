@@ -24,7 +24,7 @@ CORS(app, resources={r"/api/*": {"origins": "*", "allow_headers": ["ngrok-skip-b
 # --- Setup Daily Action Logger ---
 LOGS_DIR = os.path.join(BASE_DIR, 'logs_action')
 FEEDBACK_DIR = os.path.join(BASE_DIR, 'feedback')
-IMG_DIR = os.path.join(BASE_DIR, 'img')
+IMG_DIR = os.path.join(BASE_DIR, 'web/img')
 os.makedirs(LOGS_DIR, exist_ok=True)
 os.makedirs(FEEDBACK_DIR, exist_ok=True)
 

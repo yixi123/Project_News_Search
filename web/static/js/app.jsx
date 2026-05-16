@@ -57,7 +57,7 @@ function useLocalStorage(key, initialValue) {
 
 // Replace this with your current ngrok or tunnel URL.
 const API_BASE_URL = "";
-const BRAND_ICON_PRIMARY = "../../../img/NewsTrace_icon3.png";
+const BRAND_ICON_PRIMARY = "img/NewsTrace_icon2.png";
 
 
 // --- ICONS (Heroicons) ---

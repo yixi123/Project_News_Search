@@ -57,7 +57,7 @@ function useLocalStorage(key, initialValue) {
 
 // Replace this with your current ngrok or tunnel URL.
 const API_BASE_URL = "https://situation-degrease-flavorful.ngrok-free.dev";
-const BRAND_ICON_PRIMARY = "../img/NewsTrace_icon3.png";
+const BRAND_ICON_PRIMARY = "img/NewsTrace_icon2.png";
 
 // --- ICONS (Heroicons) ---
 const SearchIcon = () => (
