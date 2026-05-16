@@ -8,6 +8,7 @@ import time
 import logging
 import traceback
 from datetime import datetime
+from flask_cors import CORS
 
 # Add parent directory to sys.path to import demo_yield
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +18,8 @@ from LLM_GLM import bouncer_preset_chat, glm_preset_chat
 from prompt import generate_full_prompt
 
 app = Flask(__name__)
+# Configure CORS to allow the custom tunnel headers used by the frontend
+CORS(app, resources={r"/api/*": {"origins": "*", "allow_headers": ["ngrok-skip-browser-warning", "Bypass-Tunnel-Reminder", "Accept", "Content-Type"]}})
 
 # --- Setup Daily Action Logger ---
 LOGS_DIR = os.path.join(BASE_DIR, 'logs_action')
