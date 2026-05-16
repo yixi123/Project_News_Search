@@ -58,7 +58,7 @@ function useLocalStorage(key, initialValue) {
 // Replace this with your current ngrok or tunnel URL.
 const API_BASE_URL = "";
 const BRAND_ICON_PRIMARY = "../../../img/NewsTrace_icon3.png";
-const BRAND_ICON_FALLBACK = "../../img/NewsTrace_icon3.png";
+
 
 // --- ICONS (Heroicons) ---
 const SearchIcon = () => (
@@ -78,11 +78,6 @@ const BrandIcon = ({ className = "" }) => (
     src={BRAND_ICON_PRIMARY}
     alt="NewsTrace icon"
     className={className}
-    onError={(e) => {
-      if (e.currentTarget.src.includes("NewsTrace_icon3.png")) {
-        e.currentTarget.src = BRAND_ICON_FALLBACK;
-      }
-    }}
   />
 );
 
