@@ -134,7 +134,7 @@ def run_background_pipeline(query, job, client_ip):
             job['condition'].notify_all()
 
         messages = generate_full_prompt(query, articles)
-        message_hash = hashlib.md5((json.dumps(messages)).encode('utf-8')).hexdigest()
+        message_hash = hashlib.md5(json.dumps(messages, sort_keys=True).encode('utf-8')).hexdigest()
         log_event("INFO", f"Message hash produced: {message_hash}", "run_background_pipeline", ip=client_ip)
         
         llm_start = time.time()
