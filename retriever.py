@@ -61,8 +61,6 @@ def get_articles_from_query(user_query, top_k=10):
         errors="coerce"
     ).dt.year
     number_of_years = temp_df["year"].nunique()
-    print(f"Number of years in dataset: {number_of_years}")
-    print(temp_df["year"].unique())
     temp_df = temp_df.sort_values(
         "score",
         ascending=False
