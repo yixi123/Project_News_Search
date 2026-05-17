@@ -364,7 +364,7 @@ const FeedbackPanel = ({ onSubmit, isSubmitting, status, onClose, isDarkMode }) 
   );
 };
 
-const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode }) => (
+const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled }) => (
   <footer className={`border-t backdrop-blur-sm mt-auto ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
     <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4 text-sm text-slate-600">
       <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
@@ -373,7 +373,14 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
         </button>
         <button type="button" onClick={onOpenFeedback} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>Feedback</button>
-        <button type="button" onClick={onNavigateHome} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>{homeLabel}</button>
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          disabled={isHomeDisabled}
+          className={`transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}
+        >
+          {homeLabel}
+        </button>
       </div>
     </div>
   </footer>
@@ -649,6 +656,7 @@ const App = () => {
             homeLabel={hasTimelineCache ? (viewTimeline ? "Back to intro" : "Back to timeline") : "Back to intro"}
             isDarkMode={isDarkMode}
             onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
+            isHomeDisabled={isLoading || isTracing}
           />
         </main>
       )}

@@ -110,7 +110,7 @@ def run_background_pipeline(query, job, client_ip):
             job['status'] = 'completed'
             with job['condition']:
                 job['condition'].notify_all()
-            log_event("WARNING", f"Query rejected: {bouncer_result.get('rejection_reason')}", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
+            log_event("WARNING", f"Query '{query}' rejected: {bouncer_result.get('rejection_reason')}", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
             return
 
         job['events'].append({'type': 'progress', 'message': 'Searching dataset for relevant newspaper articles...'})
@@ -126,7 +126,7 @@ def run_background_pipeline(query, job, client_ip):
             job['status'] = 'completed'
             with job['condition']:
                 job['condition'].notify_all()
-            log_event("WARNING", "No relevant articles found", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
+            log_event("WARNING", f"No relevant articles found for query '{query}'", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
             return
 
         job['events'].append({'type': 'progress', 'message': 'Generating chronological timeline...'})
@@ -135,7 +135,7 @@ def run_background_pipeline(query, job, client_ip):
 
         messages = generate_full_prompt(query, articles)
         message_hash = hashlib.md5(json.dumps(messages, sort_keys=True).encode('utf-8')).hexdigest()
-        log_event("INFO", f"Message hash produce: {message_hash}", "run_background_pipeline", ip=client_ip)
+        log_event("INFO", f"Message hash produced: {message_hash}", "run_background_pipeline", ip=client_ip)
         
         llm_start = time.time()
         event_generator = glm_preset_chat(messages)
@@ -149,7 +149,7 @@ def run_background_pipeline(query, job, client_ip):
         with job['condition']:
             job['condition'].notify_all()
             
-        log_event("INFO", "Timeline generation completed successfully", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+        log_event("INFO", f"Timeline generation completed successfully, Query: '{query}', Total Events: {len(job['events'])}", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
         log_event("INFO", "Total job completed", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
 
     except Exception as e:
