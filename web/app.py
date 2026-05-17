@@ -149,7 +149,10 @@ def run_background_pipeline(query, job, client_ip):
         with job['condition']:
             job['condition'].notify_all()
             
-        log_event("INFO", f"Timeline generation completed successfully, Query: '{query}', Total Events: {len(job['events'])}", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+        if len(job['events']) < 10:
+            log_event("WARNING", f"Timeline generation completed but with very few events ({len(job['events'])}). Query: '{query}'", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+        else:
+            log_event("INFO", f"Timeline generation completed successfully, Query: '{query}', Total Events: {len(job['events'])}", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
         log_event("INFO", "Total job completed", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
 
     except Exception as e:

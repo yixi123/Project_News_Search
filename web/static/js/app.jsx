@@ -56,7 +56,7 @@ function useLocalStorage(key, initialValue) {
 }
 
 // Replace this with your current ngrok or tunnel URL.
-const API_BASE_URL = "";
+const API_BASE_URL = "https://situation-degrease-flavorful.ngrok-free.dev";
 
 // --- ICONS (Heroicons) ---
 const SearchIcon = () => (
@@ -571,7 +571,7 @@ const App = () => {
         </div>
       )}
       
-      {!isLoading && !timeline && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && !error && (
+      {!isLoading && !timeline && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && !error && !(viewTimeline && !isTracing) && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-amber-950/60 border border-amber-900 text-amber-200' : 'bg-orange-50 border border-orange-200 text-orange-800'}`}>
           <p className="font-semibold">Notice</p>
           <p className="text-sm opacity-90">{progressMsg}</p>
