@@ -91,7 +91,8 @@ def get_articles_from_query(user_query, top_k=10):
             "date": row["date"],
             "title": row["title"],
             "description": row["description"],
-            "url": row["url"]
+            "url": row["url"],
+            "score": float(row["score"]) if "score" in row and not pd.isna(row["score"]) else 0.0
         })
 
     return articles[:top_k]

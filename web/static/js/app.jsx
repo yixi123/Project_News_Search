@@ -56,7 +56,7 @@ function useLocalStorage(key, initialValue) {
 }
 
 // Replace this with your current ngrok or tunnel URL.
-const API_BASE_URL = "https://situation-degrease-flavorful.ngrok-free.dev";
+const API_BASE_URL = "";
 
 // --- ICONS (Heroicons) ---
 const SearchIcon = () => (
@@ -364,8 +364,8 @@ const FeedbackPanel = ({ onSubmit, isSubmitting, status, onClose, isDarkMode }) 
   );
 };
 
-const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled }) => (
-  <footer className={`border-t backdrop-blur-sm mt-auto ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
+const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled, onToggleRetrieval, showRetrieval }) => (
+  <footer className={`fixed bottom-0 left-0 w-full border-t backdrop-blur-sm z-50 ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
     <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4 text-sm text-slate-600">
       <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
       <div className="flex items-center gap-4">
@@ -373,6 +373,7 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
         </button>
         <button type="button" onClick={onOpenFeedback} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>Feedback</button>
+        <button type="button" onClick={onToggleRetrieval} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'} ${showRetrieval ? 'font-semibold' : ''}`}>{showRetrieval ? 'Hide Retrieval' : 'Retrieval'}</button>
         <button
           type="button"
           onClick={onNavigateHome}
@@ -398,6 +399,8 @@ const App = () => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [viewTimeline, setViewTimeline] = useLocalStorage('newsTrace_viewTimeline', false);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('newsTrace_isDarkMode', false);
+  const [retrievalArticles, setRetrievalArticles] = useState(null);
+  const [showRetrieval, setShowRetrieval] = useLocalStorage('newsTrace_showRetrieval', false);
 
   useEffect(() => {
     if (isTracing && query) {
@@ -414,6 +417,9 @@ const App = () => {
     if (!isResume) {
       setTimeline(null); 
       setQuery(searchQuery);
+      // Clear previous retrieval trace when starting a fresh search
+      setRetrievalArticles(null);
+      setShowRetrieval(false);
     }
     setIsTracing(true);
     setProgressMsg(isResume ? "Resuming trace..." : "Connecting to server...");
@@ -470,6 +476,12 @@ const App = () => {
               const data = JSON.parse(dataStr);
               if (data.type === "progress") {
                 setProgressMsg(data.message);
+              } else if (data.type === "retrieval") {
+                // Replace retrieval trace with fresh articles sorted by score
+                const articles = Array.isArray(data.articles) ? data.articles.slice().sort((a,b) => (b.score||0) - (a.score||0)) : [];
+                setRetrievalArticles(articles);
+                // open sidebar automatically when retrieval arrives
+                setShowRetrieval(true);
               } else {
                 data.id = `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
                 setTimeline(prev => {
@@ -554,7 +566,7 @@ const App = () => {
   // until the user presses trace.
 
   return (
-    <div className={`min-h-screen flex flex-col relative transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <SearchPanel onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
       
       {error && (
@@ -664,9 +676,54 @@ const App = () => {
             isDarkMode={isDarkMode}
             onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
             isHomeDisabled={isLoading || isTracing}
+            onToggleRetrieval={() => setShowRetrieval(prev => !prev)}
+            showRetrieval={showRetrieval}
           />
         </main>
       )}
+      {/* Retrieval Trace Sidebar */}
+      <AnimatePresence>
+        {showRetrieval && (
+          <motion.aside
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            transition={{ type: 'tween', duration: 0.25 }}
+            className={`fixed right-4 top-20 bottom-4 w-96 z-50 rounded-2xl shadow-2xl overflow-hidden ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
+              <div className="font-semibold">Retrieval Trace</div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-slate-400">{retrievalArticles ? retrievalArticles.length : 0} articles</div>
+                <button onClick={() => setShowRetrieval(false)} className={`px-3 py-1 rounded-full text-sm ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>Close</button>
+              </div>
+            </div>
+            <div className="p-3 overflow-y-auto h-full">
+              {!retrievalArticles && (
+                <div className="p-4 text-sm text-slate-500">No retrieval trace available.</div>
+              )}
+              {retrievalArticles && retrievalArticles.length > 0 && (
+                <div className="space-y-3">
+                  {retrievalArticles.map((a, i) => (
+                    <a key={i} href={a.url} target="_blank" rel="noreferrer" className="block p-3 rounded-xl hover:shadow-md transition-colors">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold line-clamp-2">{a.title}</div>
+                          <div className="text-xs text-slate-400 mt-1">{a.date}</div>
+                        </div>
+                        <div className="ml-3 flex-shrink-0">
+                          <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-slate-800 text-sky-300' : 'bg-slate-100 text-slate-800'}`}>{(a.score||0).toFixed(3)}</div>
+                        </div>
+                      </div>
+                      {a.description && <div className="text-xs mt-2 text-slate-500 line-clamp-3">{a.description}</div>}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

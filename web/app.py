@@ -121,6 +121,15 @@ def run_background_pipeline(query, job, client_ip):
         articles = get_articles_from_query(query, 100)
         log_event("INFO", f"Fetched {len(articles)} articles", "run_background_pipeline:get_articles_from_query", ip=client_ip, perf_ms=(time.time() - search_start) * 1000)
 
+        # Emit retrieval trace to clients (sorted by similarity score descending)
+        try:
+            articles_sorted = sorted(articles, key=lambda x: x.get('score', 0), reverse=True)
+            job['events'].append({'type': 'retrieval', 'articles': articles_sorted})
+            with job['condition']:
+                job['condition'].notify_all()
+        except Exception as e:
+            log_event('ERROR', f'Failed to emit retrieval trace: {e}', 'run_background_pipeline', ip=client_ip, error=traceback.format_exc())
+
         if len(articles) == 0:
             job['events'].append({'type': 'progress', 'message': 'No relevant articles found in the dataset. Please try a different query.'})
             job['status'] = 'completed'
