@@ -1,5 +1,6 @@
 # System prompt for timeline generation
 import json
+import copy
 
 
 TIMELINE_SYSTEM_PROMPT = """You are an Efficient News Editor. Your goal is to convert retrieved news articles into a structured JSON timeline.
@@ -114,7 +115,7 @@ def generate_full_prompt(query: str, articles: list) -> list:
         articles_for_prompt += f"Title: {article.get('title')}\n"
         articles_for_prompt += f"Description: {article.get('description')}\n"
         articles_for_prompt += f"URL: {article.get('url')}\n\n"
-    messages = MESSAGES.copy()
+    messages = copy.deepcopy(MESSAGES)  # Deep copy to avoid shared dict mutation
     messages[-1]["content"] = messages[-1]["content"].format(
         user_query=query,
         articles=articles_for_prompt,
