@@ -364,10 +364,16 @@ const FeedbackPanel = ({ onSubmit, isSubmitting, status, onClose, isDarkMode }) 
   );
 };
 
-const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled, onToggleRetrieval, showRetrieval }) => (
+const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled, onToggleRetrieval, showRetrieval, retrieverOnline }) => (
   <footer className={`fixed bottom-0 left-0 w-full border-t backdrop-blur-sm z-50 ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
     <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4 text-sm text-slate-600">
-      <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
+      <div className="flex items-center gap-3">
+        <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
+        <div className="text-xs flex items-center gap-2">
+          <span className={`h-2.5 w-2.5 rounded-full ${typeof retrieverOnline !== 'undefined' && retrieverOnline === true ? 'bg-emerald-400' : typeof retrieverOnline !== 'undefined' && retrieverOnline === null ? 'bg-slate-400' : 'bg-rose-400'}`}></span>
+          <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Retriever online' : retrieverOnline === null ? 'Checking retriever...' : 'Retriever offline'}</span>
+        </div>
+      </div>
       <div className="flex items-center gap-4">
         <button type="button" onClick={onToggleDarkMode} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
@@ -401,6 +407,27 @@ const App = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('newsTrace_isDarkMode', false);
   const [retrievalArticles, setRetrievalArticles] = useState(null);
   const [showRetrieval, setShowRetrieval] = useLocalStorage('newsTrace_showRetrieval', false);
+  const [retrieverOnline, setRetrieverOnline] = useState(null);
+
+  const checkRetriever = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/health`, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Bypass-Tunnel-Reminder': 'true',
+          'Accept': 'application/json'
+        }
+      });
+      setRetrieverOnline(res.ok);
+    } catch (err) {
+      setRetrieverOnline(false);
+    }
+  };
+
+  useEffect(() => {
+    checkRetriever();
+  }, []);
 
   useEffect(() => {
     if (isTracing && query) {
@@ -678,6 +705,7 @@ const App = () => {
             isHomeDisabled={isLoading || isTracing}
             onToggleRetrieval={() => setShowRetrieval(prev => !prev)}
             showRetrieval={showRetrieval}
+            retrieverOnline={retrieverOnline}
           />
         </main>
       )}

@@ -180,6 +180,14 @@ def index():
     log_event("INFO", "Accessed homepage", "index", ip=client_ip)
     return render_template('index.html')
 
+
+@app.route('/api/health')
+def health():
+    # Simple health check for frontend to confirm backend/retriever is reachable
+    client_ip = request.remote_addr
+    log_event("INFO", "Health check", "health", ip=client_ip)
+    return Response(json.dumps({"ok": True, "service": "retriever"}), mimetype='application/json')
+
 @app.route('/api/news')
 def get_news():
     query = request.args.get('query', '')
