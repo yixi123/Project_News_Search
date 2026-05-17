@@ -118,7 +118,7 @@ def run_background_pipeline(query, job, client_ip):
             job['condition'].notify_all()
         
         search_start = time.time()
-        articles = get_articles_from_query(query, 200)
+        articles = get_articles_from_query(query, 100)
         log_event("INFO", f"Fetched {len(articles)} articles", "run_background_pipeline:get_articles_from_query", ip=client_ip, perf_ms=(time.time() - search_start) * 1000)
 
         if len(articles) == 0:
@@ -264,4 +264,4 @@ def submit_feedback():
         return Response(json.dumps({"ok": False, "error": str(e)}), status=400, mimetype='application/json')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host="127.0.0.1")
+    app.run(debug=True, port=5000, use_reloader=False, host="127.0.0.1")

@@ -104,7 +104,7 @@ def get_articles_from_query(user_query, top_k=10):
 if __name__ == "__main__":
     results = get_articles_from_query(
         "covid",
-        top_k=200
+        top_k=100
     )
     print(f"Retrieved {len(results)} articles:")
     results_df = pd.DataFrame(results)

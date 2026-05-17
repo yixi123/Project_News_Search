@@ -335,12 +335,12 @@ def bouncer_preset_chat(user_query: str) -> dict:
     return response_dict
 
 
-from placeholder_sematic_search import get_json_from_dataset
 if __name__ == "__main__":
+    from retriever import get_articles_from_query
     demo_query = "aweasdnoisahoixzhcvrw"
     print("Generating timeline for query:", demo_query)
     print("Retrieving articles...")
-    returned_articles = get_json_from_dataset(demo_query)
+    returned_articles = get_articles_from_query(demo_query)
     demo_messages = generate_full_prompt(demo_query, returned_articles)
 
     print("Generating timeline...\n")

@@ -73,7 +73,7 @@ const ChevronIcon = ({ open }) => (
 
 // --- COMPONENTS ---
 
-const SearchPanel = ({ onSearch, isLoading, isDarkMode }) => {
+const SearchPanel = ({ onSearch, isLoading, isTracing, isDarkMode }) => {
   const [query, setQuery] = useLocalStorage('newsTrace_query', '');
 
   const handleSubmit = (e) => {
@@ -102,10 +102,10 @@ const SearchPanel = ({ onSearch, isLoading, isDarkMode }) => {
             />
             <button 
               type="submit" 
-              disabled={isLoading || !query.trim()}
+              disabled={isLoading || isTracing || !query.trim()}
               className={`absolute right-2 px-6 py-1.5 rounded-full text-sm font-medium disabled:opacity-50 transition-colors ${isDarkMode ? 'bg-slate-100 text-slate-900 hover:bg-white' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
             >
-              {isLoading ? "Searching..." : "Trace"}
+              {isLoading || isTracing ? "Tracing..." : "Trace"}
             </button>
           </div>
         </form>
@@ -254,12 +254,12 @@ const TimelineFeed = ({ timeline, isDarkMode }) => {
   const groupedTimeline = useMemo(() => groupEventsByMonth(timeline), [timeline]);
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4">
+    <div className="max-w-5xl mx-auto py-8 px-4">
       {groupedTimeline.map(([monthYear, events]) => (
-        <div key={monthYear} className="relative mb-16">
+        <div key={monthYear} className="relative mb-8">
           {/* Sticky Month Header */}
-          <div className="sticky top-[104px] z-40 flex justify-center mb-8 pointer-events-none">
-            <div className={`backdrop-blur px-6 py-2 rounded-full font-medium shadow-md pointer-events-auto ${isDarkMode ? 'bg-slate-100/95 text-slate-900 shadow-black/10' : 'bg-slate-900/90 text-white shadow-slate-900/10'}`}>
+          <div className="sticky top-[104px] z-40 flex justify-center mb-4 pointer-events-none">
+            <div className={`backdrop-blur px-3 py-1 text-sm rounded-full font-medium shadow-md pointer-events-auto ${isDarkMode ? 'bg-slate-100/95 text-slate-900 shadow-black/10' : 'bg-slate-900/90 text-white shadow-slate-900/10'}`}>
               {monthYear}
             </div>
           </div>
@@ -548,7 +548,7 @@ const App = () => {
 
   return (
     <div className={`min-h-screen flex flex-col relative transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-      <SearchPanel onSearch={handleSearch} isLoading={isLoading} isDarkMode={isDarkMode} />
+      <SearchPanel onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
       
       {error && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-rose-950/60 border border-rose-900 text-rose-200' : 'bg-red-50 border border-red-200 text-red-700'}`}>
