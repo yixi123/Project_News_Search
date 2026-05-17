@@ -171,7 +171,7 @@ def index():
 @app.route('/api/news')
 def get_news():
     query = request.args.get('query', '')
-    query = query.strip().capitalize()
+    query = query.strip().lower()
     client_ip = request.remote_addr
     
     if not query:

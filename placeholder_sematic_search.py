@@ -2,6 +2,13 @@ import os
 import pandas as pd
 
 def get_json_from_dataset(query: str) -> list:
+    """
+    Search through the GDELT dataset for entries matching the query and return a list of JSON objects.
+    arguments:
+    query: The search term to look for in the dataset.
+    returns:
+    A list of JSON objects containing the date, title, description, and URL of matching entries.
+    """
     gdelt_dir = os.path.join("dataset", "gdelt_dataset")
 
     csv_files = [
