@@ -57,8 +57,6 @@ function useLocalStorage(key, initialValue) {
 
 // Replace this with your current ngrok or tunnel URL.
 const API_BASE_URL = "";
-const BRAND_ICON_PRIMARY = "img/NewsTrace_icon2.png";
-
 
 // --- ICONS (Heroicons) ---
 const SearchIcon = () => (
@@ -71,14 +69,6 @@ const ChevronIcon = ({ open }) => (
   <svg className={`w-5 h-5 transition-transform duration-300 ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
   </svg>
-);
-
-const BrandIcon = ({ className = "" }) => (
-  <img
-    src={BRAND_ICON_PRIMARY}
-    alt="NewsTrace icon"
-    className={className}
-  />
 );
 
 // --- COMPONENTS ---
@@ -96,10 +86,7 @@ const SearchPanel = ({ onSearch, isLoading, isDarkMode }) => {
   return (
     <div className={`sticky top-0 z-50 py-6 px-4 backdrop-blur-md border-b shadow-sm ${isDarkMode ? 'bg-slate-950/85 border-slate-800 shadow-black/20' : 'bg-slate-50/80 border-slate-200'}`}>
       <div className="max-w-4xl mx-auto flex items-center gap-6">
-        <h1 className={`text-2xl font-bold tracking-tight hidden sm:flex items-center gap-2 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-          <BrandIcon className="w-10 h-10 rounded-md object-contain" />
-          <span>NewsTrace</span>
-        </h1>
+        <h1 className={`text-2xl font-bold tracking-tight hidden sm:block ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>NewsTrace</h1>
         <form onSubmit={handleSubmit} className="flex-1 w-full">
           <div className="relative flex items-center">
             <div className="absolute left-4">
@@ -380,10 +367,7 @@ const FeedbackPanel = ({ onSubmit, isSubmitting, status, onClose, isDarkMode }) 
 const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode }) => (
   <footer className={`border-t backdrop-blur-sm mt-auto ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
     <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4 text-sm text-slate-600">
-      <span className={`font-medium inline-flex items-center gap-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
-        <BrandIcon className="w-7 h-7 rounded object-contain" />
-        <span>NewsTrace</span>
-      </span>
+      <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
       <div className="flex items-center gap-4">
         <button type="button" onClick={onToggleDarkMode} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
@@ -583,8 +567,12 @@ const App = () => {
       {/* First-Time User Introduction */}
       {!isLoading && (!viewTimeline || !timeline || timeline.length === 0) && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
         <div id="intro" className="max-w-4xl mx-auto mt-16 px-4 md:px-0 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] scroll-mt-24">
-          <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-12 pt-6 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
-            <img src="img/NewsTrace_icon3.png" alt="NewsTrace" className="w-32 h-32 mx-auto flex items-center justify-center" />
+          <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-8 md:p-12 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
+            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-md text-white">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3L22 4" />
+              </svg>
+            </div>
             <h2 className={`text-3xl md:text-4xl font-extrabold tracking-tight mb-4 ${isDarkMode ? 'text-slate-50' : 'text-slate-900'}`}>
               Welcome to NewsTrace
             </h2>

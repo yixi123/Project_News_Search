@@ -1,5 +1,5 @@
 import hashlib
-from flask import Flask, render_template, Response, request, send_from_directory
+from flask import Flask, render_template, Response, request
 import json
 import os
 import sys
@@ -24,7 +24,6 @@ CORS(app, resources={r"/api/*": {"origins": "*", "allow_headers": ["ngrok-skip-b
 # --- Setup Daily Action Logger ---
 LOGS_DIR = os.path.join(BASE_DIR, 'logs_action')
 FEEDBACK_DIR = os.path.join(BASE_DIR, 'feedback')
-IMG_DIR = os.path.join(BASE_DIR, 'web/img')
 os.makedirs(LOGS_DIR, exist_ok=True)
 os.makedirs(FEEDBACK_DIR, exist_ok=True)
 
@@ -83,7 +82,7 @@ def save_feedback_entry(payload, client_ip, user_agent):
 
     feedback_file = os.path.join(FEEDBACK_DIR, f"{datetime.now().strftime('%Y-%m-%d')}.jsonl")
     with open(feedback_file, "a", encoding="utf-8") as handle:
-        handle.write(json.dumps(record, ensure_ascii=False, indent=2) + "\n")
+        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     return record
 
@@ -168,10 +167,6 @@ def index():
     client_ip = request.remote_addr
     log_event("INFO", "Accessed homepage", "index", ip=client_ip)
     return render_template('index.html')
-
-@app.route('/img/<path:filename>')
-def serve_image(filename):
-    return send_from_directory(IMG_DIR, filename)
 
 @app.route('/api/news')
 def get_news():
