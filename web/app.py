@@ -13,7 +13,7 @@ from flask_cors import CORS
 # Add parent directory to sys.path to import demo_yield
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from placeholder_sematic_search import get_json_from_dataset
+from retriever import get_articles_from_query
 from LLM_GLM import bouncer_preset_chat, glm_preset_chat
 from prompt import generate_full_prompt
 
@@ -118,8 +118,8 @@ def run_background_pipeline(query, job, client_ip):
             job['condition'].notify_all()
         
         search_start = time.time()
-        articles = get_json_from_dataset(query)
-        log_event("INFO", f"Fetched {len(articles)} articles", "run_background_pipeline:get_json_from_dataset", ip=client_ip, perf_ms=(time.time() - search_start) * 1000)
+        articles = get_articles_from_query(query, 200)
+        log_event("INFO", f"Fetched {len(articles)} articles", "run_background_pipeline:get_articles_from_query", ip=client_ip, perf_ms=(time.time() - search_start) * 1000)
 
         if len(articles) == 0:
             job['events'].append({'type': 'progress', 'message': 'No relevant articles found in the dataset. Please try a different query.'})
@@ -264,4 +264,4 @@ def submit_feedback():
         return Response(json.dumps({"ok": False, "error": str(e)}), status=400, mimetype='application/json')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    app.run(debug=True, port=5000, host="127.0.0.1")

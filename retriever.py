@@ -8,8 +8,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Load data and embeddings
 # =========================
 
-ALL_NEWS_PATH = "/Users/sharon/Downloads/embedding_output/all_news.csv"
-EMBEDDINGS_PATH = "/Users/sharon/Downloads/embedding_output/news_embeddings.npy"
+ALL_NEWS_PATH = "all_news/all_news.csv"
+EMBEDDINGS_PATH = "all_news/news_embeddings.npy"
 
 all_news = pd.read_csv(ALL_NEWS_PATH)
 embeddings = np.load(EMBEDDINGS_PATH)
@@ -60,11 +60,13 @@ def get_articles_from_query(user_query, top_k=10):
         temp_df["date"],
         errors="coerce"
     ).dt.year
-
+    number_of_years = temp_df["year"].nunique()
+    print(f"Number of years in dataset: {number_of_years}")
+    print(temp_df["year"].unique())
     temp_df = temp_df.sort_values(
         "score",
         ascending=False
-    ).head(200)
+    ).head(top_k*number_of_years)
 
     results = []
 
@@ -72,9 +74,9 @@ def get_articles_from_query(user_query, top_k=10):
         yearly_news = (
             temp_df[temp_df["year"] == year]
             .sort_values("score", ascending=False)
-            .head(2)
         )
 
+        yearly_news = yearly_news.head(int(np.ceil(len(yearly_news) / (top_k*number_of_years) * top_k)))
         results.append(yearly_news)
 
     if len(results) == 0:
@@ -104,8 +106,9 @@ def get_articles_from_query(user_query, top_k=10):
 if __name__ == "__main__":
     results = get_articles_from_query(
         "covid",
-        top_k=10
+        top_k=200
     )
-
-    for article in results:
-        print(article)
+    print(f"Retrieved {len(results)} articles:")
+    results_df = pd.DataFrame(results)
+    results_df["year"] = pd.to_datetime(results_df["date"], errors="coerce").dt.year
+    print(results_df["year"].unique())
