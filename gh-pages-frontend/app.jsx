@@ -603,7 +603,7 @@ const App = () => {
         </div>
       )}
       
-      {!isTracing && viewTimeline && !timeline && !isLoading && (
+      {!isTracing && viewTimeline && !timeline && !isLoading && !error && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-violet-950/60 border border-violet-900 text-violet-200' : 'bg-purple-50 border border-purple-200 text-purple-800'}`}>
           <p className="font-semibold">⚠️ Timeline Cannot Be Generated</p>
           <p className="text-sm opacity-90">This query contains sensitive or geopolitical information that our LLM cannot process. Please try a different search topic.</p>
@@ -618,7 +618,7 @@ const App = () => {
       )}
 
       {/* First-Time User Introduction */}
-      {!isLoading && (!viewTimeline || !timeline || timeline.length === 0) && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
+      {!isLoading && !viewTimeline && (!timeline || timeline.length === 0) && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
         <div id="intro" className="max-w-4xl mx-auto mt-16 px-4 md:px-0 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] scroll-mt-24">
           <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-8 md:p-12 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
             <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-md text-white">
