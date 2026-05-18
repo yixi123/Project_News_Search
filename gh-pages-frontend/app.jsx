@@ -371,7 +371,7 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
         <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
         <div className="text-xs flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${typeof retrieverOnline !== 'undefined' && retrieverOnline === true ? 'bg-emerald-400' : typeof retrieverOnline !== 'undefined' && retrieverOnline === null ? 'bg-slate-400' : 'bg-rose-400'}`}></span>
-          <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Database online' : retrieverOnline === null ? 'Checking retriever...' : 'Database offline'}</span>
+          <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Retriever online' : retrieverOnline === null ? 'Checking retriever...' : 'Retriever offline'}</span>
         </div>
       </div>
       <div className="flex items-center gap-4">
