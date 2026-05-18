@@ -371,7 +371,7 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
         <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
         <div className="text-xs flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${typeof retrieverOnline !== 'undefined' && retrieverOnline === true ? 'bg-emerald-400' : typeof retrieverOnline !== 'undefined' && retrieverOnline === null ? 'bg-slate-400' : 'bg-rose-400'}`}></span>
-          <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Retriever online' : retrieverOnline === null ? 'Checking retriever...' : 'Retriever offline'}</span>
+          <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Database online' : retrieverOnline === null ? 'Checking retriever...' : 'Database offline'}</span>
         </div>
       </div>
       <div className="flex items-center gap-4">
@@ -379,7 +379,7 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
         </button>
         <button type="button" onClick={onOpenFeedback} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>Feedback</button>
-        <button type="button" onClick={onToggleRetrieval} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'} ${showRetrieval ? 'font-semibold' : ''}`}>{showRetrieval ? 'Hide Retrieval' : 'Retrieval'}</button>
+        <button type="button" onClick={onToggleRetrieval} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'} ${showRetrieval ? 'font-semibold' : ''}`}>{showRetrieval ? 'Hide Sources' : 'View Sources'}</button>
         <button
           type="button"
           onClick={onNavigateHome}
@@ -699,7 +699,7 @@ const App = () => {
           <Footer
             onOpenFeedback={() => setIsFeedbackOpen(true)}
             onNavigateHome={handleNavigateHome}
-            homeLabel={hasTimelineCache ? (viewTimeline ? "Back to intro" : "Back to timeline") : "Back to intro"}
+            homeLabel={hasTimelineCache ? (viewTimeline ? "Home" : "Timeline") : "Home"}
             isDarkMode={isDarkMode}
             onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
             isHomeDisabled={isLoading || isTracing}
@@ -720,7 +720,7 @@ const App = () => {
             className={`fixed right-4 top-20 bottom-4 w-96 z-50 rounded-2xl shadow-2xl overflow-hidden ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
-              <div className="font-semibold">Retrieval Trace</div>
+              <div className="font-semibold">View Sources</div>
               <div className="flex items-center gap-2">
                 <div className="text-xs text-slate-400">{retrievalArticles ? retrievalArticles.length : 0} articles</div>
                 <button onClick={() => setShowRetrieval(false)} className={`px-3 py-1 rounded-full text-sm ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>Close</button>
@@ -728,7 +728,7 @@ const App = () => {
             </div>
             <div className="p-3 overflow-y-auto h-full">
               {!retrievalArticles && (
-                <div className="p-4 text-sm text-slate-500">No retrieval trace available.</div>
+                <div className="p-4 text-sm text-slate-500">No sources available.</div>
               )}
               {retrievalArticles && retrievalArticles.length > 0 && (
                 <div className="space-y-3">
