@@ -657,11 +657,19 @@ const App = () => {
               </div>
             </div>
             
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-sky-950/60 text-sky-200 border-sky-900' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Note: The indexed dataset spans securely from January 2016 to May 2026.
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-sky-950/60 text-sky-200 border-sky-900' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Note: The indexed dataset spans securely from January 2016 to May 2026.
+              </div>
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-amber-950/60 text-amber-200 border-amber-900' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Generation takes approx. 5 minutes.
+              </div>
             </div>
           </div>
         </div>
