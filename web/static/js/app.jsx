@@ -12,7 +12,12 @@ function getSpineClasses(importance) {
 }
 
 function formatDateToMonthYearString(dateStr) {
-  const date = new Date(dateStr);
+  if (!dateStr) return "Unknown Date";
+  // If it's a range like "Nov 17 - Nov 22, 2023", try to extract the year and month 
+  // or just return the string if it's already a short text like "Nov 2023"
+  const cleanStr = dateStr.split('-')[0].trim();
+  const date = new Date(cleanStr);
+  if (isNaN(date.getTime())) return dateStr;
   return date.toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
@@ -119,7 +124,14 @@ const NewsCard = ({ event, isDarkMode }) => {
   const [showAllSources, setShowAllSources] = useState(false);
   
   const hasSubEvents = event.sub_events && event.sub_events.length > 0;
-  const isMajor = event.type === 'major_event';
+  // Map old schema and new JSON schema together
+  const isMajor = event.type === 'major_event' || typeof event.milestone_title !== 'undefined';
+  const headline = event.milestone_title || event.headline;
+  const dateStr = event.date_range || event.date;
+  const summary = event.synthesis || event.summary;
+  
+  // Extract sources from sub_events if top-level sources don't exist in new schema
+  const sources = event.sources || (hasSubEvents ? event.sub_events.map(sub => sub.url).filter(url => url) : []);
 
   return (
     <div className={`relative rounded-2xl shadow-sm border hover:shadow-md transition-all group ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-100 hover:border-slate-600' : 'bg-white border-slate-200 text-slate-900'} ${isMajor ? (isDarkMode ? 'p-6 border-sky-900 ring-1 ring-sky-950' : 'p-6 border-blue-100 ring-1 ring-blue-50') : 'p-4'}`}>
@@ -130,23 +142,23 @@ const NewsCard = ({ event, isDarkMode }) => {
               Major Event
             </span>
           )}
-          <div className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{event.date}</div>
+          <div className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{dateStr}</div>
         </div>
       </div>
       
-      <h3 className={`font-semibold ${isDarkMode ? 'text-slate-50' : 'text-slate-900'} ${isMajor ? 'text-xl mb-2' : 'text-lg mb-1.5'}`}>{event.headline}</h3>
+      <h3 className={`font-semibold ${isDarkMode ? 'text-slate-50' : 'text-slate-900'} ${isMajor ? 'text-xl mb-2' : 'text-lg mb-1.5'}`}>{headline}</h3>
       <p 
         className={`leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'} ${isMajor ? 'mb-4 text-base' : 'mb-3 text-sm line-clamp-2'}`}
-        title={!isMajor ? event.summary : undefined}
+        title={!isMajor ? summary : undefined}
       >
-        {event.summary}
+        {summary}
       </p>
 
       {/* Sources list */}
-      {event.sources && event.sources.length > 0 && (
+      {sources && sources.length > 0 && (
         <div className={`flex flex-wrap gap-2 ${hasSubEvents ? 'mb-4' : 'mb-1'}`}>
           <span className={`text-xs my-auto uppercase tracking-wide font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>Sources:</span>
-          {(showAllSources ? event.sources : event.sources.slice(0, 3)).map((url, i) => {
+          {(showAllSources ? sources : sources.slice(0, 3)).map((url, i) => {
             try { 
               const domain = new URL(url).hostname.replace('www.', '');
               return (
@@ -156,15 +168,15 @@ const NewsCard = ({ event, isDarkMode }) => {
               );
             } catch { return null; }
           })}
-          {!showAllSources && event.sources.length > 3 && (
+          {!showAllSources && sources.length > 3 && (
             <button 
               onClick={() => setShowAllSources(true)} 
               className={`text-xs px-2 py-1 transition-colors rounded-md ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
             >
-              +{event.sources.length - 3} more
+              +{sources.length - 3} more
             </button>
           )}
-          {showAllSources && event.sources.length > 3 && (
+          {showAllSources && sources.length > 3 && (
             <button 
               onClick={() => setShowAllSources(false)} 
               className={`text-xs px-2 py-1 transition-colors rounded-md ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
@@ -515,13 +527,22 @@ const App = () => {
                 // open sidebar automatically when retrieval arrives
                 setShowRetrieval(true);
               } else {
-                data.id = `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                const transformedData = {
+                  ...data,
+                  id: `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                  date: data.date_range || data.date,
+                  headline: data.milestone_title || data.headline,
+                  summary: data.synthesis || data.summary,
+                  type: 'major_event',
+                  importance: 10,
+                  sources: data.sources || (data.sub_events ? data.sub_events.map(s => s.url).filter(Boolean) : [])
+                };
                 setTimeline(prev => {
                   if (!hasClearedForReplay) {
                     hasClearedForReplay = true;
-                    return [data];
+                    return [transformedData];
                   }
-                  return [...(Array.isArray(prev) ? prev : []), data];
+                  return [...(Array.isArray(prev) ? prev : []), transformedData];
                 });
               }
             } catch (err) {
@@ -668,7 +689,7 @@ const App = () => {
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Generation takes approx. 5 minutes.
+                Generation takes approx. 1 minute.
               </div>
             </div>
           </div>

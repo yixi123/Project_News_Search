@@ -99,7 +99,7 @@ def stream_parsed_events(response_stream, start_time, messages, kwargs, log_file
 
             # Step 1: Wait until we get past the root object and into the array
             if not in_timeline_array:
-                match_idx = buffer.find('"timeline":')
+                match_idx = buffer.find('"key_events":')
                 if match_idx != -1:
                     bracket_idx = buffer.find('[', match_idx)
                     if bracket_idx != -1:
@@ -180,7 +180,7 @@ def stream_parsed_events(response_stream, start_time, messages, kwargs, log_file
         parsed_output_path = os.path.join(log_file_dir, f"{log_file_name}_parsed.json")
         with open(parsed_output_path, "w", encoding="utf-8") as f:
             json.dump({
-                "timeline": collected_timeline
+                "key_events": collected_timeline
             }, f, indent=2)
             
         content_log_file.close()
