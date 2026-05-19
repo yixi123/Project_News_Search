@@ -41,6 +41,16 @@ def chat(
 
 
 
+def _handle_error_stream(e, messages, kwargs, start_time, log_file_dir, log_file_name_prefix):
+    """Handles exceptions during streaming, logs them safely, and yields progress/sensitive errors."""
+    error_msg = str(e)
+    # Handle the specific 1301/sensitive error code logic
+    if "1301" in error_msg or 'sensitive' in error_msg.lower():
+        yield {"type": "sensitive", "message": "Sensitive content detected"}
+    else:
+        yield {"type": "progress", "message": f'Error during processing: {error_msg}'} 
+
+
 def stream_parsed_events(response_stream, start_time, messages, kwargs, log_file_name="llm_stream_output", log_file_dir=LOG_DIR):
     """
     Consumes the LLM token stream, extracts individual timeline events safely 

@@ -169,8 +169,15 @@ def run_background_pipeline(query, job, client_ip):
 
     except Exception as e:
         error_details = traceback.format_exc()
-        log_event("ERROR", f"Error during processing: {str(e)}", "run_background_pipeline", ip=client_ip, error=error_details, perf_ms=(time.time() - start_time) * 1000)
-        job['events'].append({'type': 'progress', 'message': f'Error during processing: {str(e)}'})
+        error_str = str(e)
+        
+        log_event("ERROR", f"Error during processing: {error_str}", "run_background_pipeline", ip=client_ip, error=error_details, perf_ms=(time.time() - start_time) * 1000)
+        
+        if "1301" in error_str and "敏感内容" in error_str:
+            job['events'].append({'type': 'sensitive', 'message': 'Sensitive content detected.'})
+        else:
+            job['events'].append({'type': 'progress', 'message': f'Error during processing: {error_str}'})
+            
         job['status'] = 'completed'
         with job['condition']:
             job['condition'].notify_all()
