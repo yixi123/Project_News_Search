@@ -207,13 +207,6 @@ def get_news():
             yield f"data: {json.dumps({'type': 'progress', 'message': 'Query is too long. Please limit to 100 characters.'})}\n\n"
             yield "event: close\ndata: {}\n\n"
         return Response(reject_stream(), mimetype='text/event-stream')
-    
-    if len(query) < 3:
-        log_event("WARNING", f"Query too short: {len(query)} characters", "get_news", ip=client_ip)
-        def reject_stream():
-            yield f"data: {json.dumps({'type': 'progress', 'message': 'Query is too short. Please provide at least 3 characters.'})}\n\n"
-            yield "event: close\ndata: {}\n\n"
-        return Response(reject_stream(), mimetype='text/event-stream')
 
 
     log_event("INFO", f"Query searched: {query}", "get_news", ip=client_ip)
