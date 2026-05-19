@@ -421,6 +421,8 @@ const App = () => {
   const [showRetrieval, setShowRetrieval] = useLocalStorage('newsTrace_showRetrieval', false);
   const [retrieverOnline, setRetrieverOnline] = useState(null);
   const [isBouncerRejected, setIsBouncerRejected] = useState(false);
+  const [isSensitive, setIsSensitive] = useState(false);
+  const [sortSourcesBy, setSortSourcesBy] = useState('similarity'); // 'similarity', 'newest', or 'oldest'
 
   const checkRetriever = async () => {
     try {
@@ -461,6 +463,7 @@ const App = () => {
       setRetrievalArticles(null);
       setShowRetrieval(false);
       setIsBouncerRejected(false);
+      setIsSensitive(false);
     }
     setIsTracing(true);
     setProgressMsg(isResume ? "Resuming trace..." : "Connecting to server...");
@@ -521,11 +524,14 @@ const App = () => {
                 setIsBouncerRejected(true);
                 setProgressMsg(data.message || "Your query was rejected.");
               } else if (data.type === "retrieval") {
-                // Replace retrieval trace with fresh articles sorted by score
-                const articles = Array.isArray(data.articles) ? data.articles.slice().sort((a,b) => (b.score||0) - (a.score||0)) : [];
+                // Keep the pure data, but use a memo or derive it in render. We set the raw articles from server.
+                const articles = Array.isArray(data.articles) ? data.articles : [];
                 setRetrievalArticles(articles);
                 // open sidebar automatically when retrieval arrives
                 setShowRetrieval(true);
+              } else if (data.type === "sensitive") {
+                setIsSensitive(true);
+                setProgressMsg(data.message || "Sensitive content detected.");
               } else {
                 const transformedData = {
                   ...data,
@@ -605,6 +611,7 @@ const App = () => {
     setIsLoading(false);
     setIsTracing(false);
     setIsBouncerRejected(false);
+    setIsSensitive(false);
     setProgressMsg("Initializing trace...");
     setFeedbackStatus("");
     setIsFeedbackOpen(false);
@@ -619,6 +626,22 @@ const App = () => {
   // If there's no data initialized but we just landed, we won't show anything 
   // until the user presses trace.
 
+  const sortedRetrievalArticles = useMemo(() => {
+    if (!retrievalArticles) return null;
+    return [...retrievalArticles].sort((a, b) => {
+      if (sortSourcesBy === 'newest') {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+      } else if (sortSourcesBy === 'oldest') {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+      }
+      return (b.score || 0) - (a.score || 0); // similarity default
+    });
+  }, [retrievalArticles, sortSourcesBy]);
+
   return (
     <div className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <SearchPanel onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
@@ -630,14 +653,14 @@ const App = () => {
         </div>
       )}
       
-      {!isTracing && viewTimeline && (!timeline || timeline.length === 0) && !isLoading && !error && progressMsg === "Generating chronological timeline..." && (
+      {isSensitive && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-violet-950/60 border border-violet-900 text-violet-200' : 'bg-purple-50 border border-purple-200 text-purple-800'}`}>
           <p className="font-semibold">⚠️ Timeline Cannot Be Generated</p>
           <p className="text-sm opacity-90">This query contains sensitive or geopolitical information that our LLM cannot process. Please try a different search topic.</p>
         </div>
       )}
       
-      {!isLoading && (!timeline || timeline.length === 0) && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && progressMsg !== "Generating chronological timeline..." && !error && viewTimeline && (
+      {!isLoading && (!timeline || timeline.length === 0) && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && progressMsg !== "Generating chronological timeline..." && !error && !isSensitive && viewTimeline && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-amber-950/60 border border-amber-900 text-amber-200' : 'bg-orange-50 border border-orange-200 text-orange-800'}`}>
           <p className="font-semibold">Notice</p>
           <p className="text-sm opacity-90">{progressMsg}</p>
@@ -752,22 +775,49 @@ const App = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: 'tween', duration: 0.25 }}
-            className={`fixed right-4 top-20 bottom-4 w-96 z-50 rounded-2xl shadow-2xl overflow-hidden ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
+            className={`fixed right-4 top-20 bottom-4 w-96 z-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
+            <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
               <div className="font-semibold">View Sources</div>
               <div className="flex items-center gap-2">
-                <div className="text-xs text-slate-400">{retrievalArticles ? retrievalArticles.length : 0} articles</div>
+                <div className="text-xs text-slate-400">{sortedRetrievalArticles ? sortedRetrievalArticles.length : 0} articles</div>
                 <button onClick={() => setShowRetrieval(false)} className={`px-3 py-1 rounded-full text-sm ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>Close</button>
               </div>
             </div>
-            <div className="p-3 overflow-y-auto h-full">
-              {!retrievalArticles && (
+            
+            {sortedRetrievalArticles && sortedRetrievalArticles.length > 0 && (
+              <div className="px-4 py-2 border-b flex items-center justify-between shrink-0" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
+                <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Sort by:</span>
+                <div className={`flex rounded-lg overflow-hidden border ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                  <button 
+                    onClick={() => setSortSourcesBy('similarity')} 
+                    className={`px-3 py-1 text-xs font-medium transition-colors ${sortSourcesBy === 'similarity' ? (isDarkMode ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-900') : (isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-600 hover:bg-slate-50')}`}
+                  >
+                    Similarity
+                  </button>
+                  <button 
+                    onClick={() => setSortSourcesBy('newest')} 
+                    className={`px-3 py-1 text-xs font-medium transition-colors border-l ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} ${sortSourcesBy === 'newest' ? (isDarkMode ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-900') : (isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-600 hover:bg-slate-50')}`}
+                  >
+                    Newest
+                  </button>
+                  <button 
+                    onClick={() => setSortSourcesBy('oldest')} 
+                    className={`px-3 py-1 text-xs font-medium transition-colors border-l ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} ${sortSourcesBy === 'oldest' ? (isDarkMode ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-900') : (isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-600 hover:bg-slate-50')}`}
+                  >
+                    Oldest
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="p-3 overflow-y-auto flex-1">
+              {!sortedRetrievalArticles && (
                 <div className="p-4 text-sm text-slate-500">No sources available.</div>
               )}
-              {retrievalArticles && retrievalArticles.length > 0 && (
+              {sortedRetrievalArticles && sortedRetrievalArticles.length > 0 && (
                 <div className="space-y-3 pb-20">
-                  {retrievalArticles.map((a, i) => (
+                  {sortedRetrievalArticles.map((a, i) => (
                     <a key={i} href={a.url} target="_blank" rel="noreferrer" className="block p-3 rounded-xl hover:shadow-md transition-colors">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">

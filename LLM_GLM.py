@@ -185,6 +185,9 @@ def stream_parsed_events(response_stream, start_time, messages, kwargs, log_file
             
         content_log_file.close()
 
+        if finish_reason == "sensitive":
+            yield {"type": "sensitive", "message": "Sensitive content detected"}
+
 
 def stream_chat_glm(
     messages: list[dict[str, str]],
