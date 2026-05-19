@@ -624,7 +624,7 @@ const App = () => {
       )}
 
       {/* First-Time User Introduction */}
-      {!isLoading && !viewTimeline && (!timeline || timeline.length === 0) && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
+      {!isLoading && !viewTimeline && (!progressMsg || progressMsg === "Initializing trace...") && !error && (
         <div id="intro" className="max-w-4xl mx-auto mt-16 px-4 md:px-0 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] scroll-mt-24">
           <div className={`backdrop-blur-sm rounded-3xl shadow-lg border p-8 md:p-12 text-center ${isDarkMode ? 'bg-slate-900/85 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-800'}`}>
             <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-md text-white">
@@ -681,7 +681,7 @@ const App = () => {
             </div>
           )}
 
-          {timeline && timeline.length === 0 && progressMsg !== "Generating chronological timeline..." && (
+          {viewTimeline && timeline && timeline.length === 0 && progressMsg !== "Generating chronological timeline..." && (
             <div className={`text-center py-20 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>No events found.</div>
           )}
 

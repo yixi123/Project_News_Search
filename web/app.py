@@ -121,7 +121,7 @@ def run_background_pipeline(query, job, client_ip):
             job['condition'].notify_all()
         
         search_start = time.time()
-        articles = get_articles_from_query(query, 100)
+        articles = get_articles_from_query(query, 50)
         log_event("INFO", f"Fetched {len(articles)} articles", "run_background_pipeline:get_articles_from_query", ip=client_ip, perf_ms=(time.time() - search_start) * 1000)
 
         # Emit retrieval trace to clients (sorted by similarity score descending)
