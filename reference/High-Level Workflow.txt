@@ -1,0 +1,62 @@
+High-Level Workflow
+Phase 1: Multi-Source Dataset Collection: Raw data is aggregated from diverse sources—GDELT 2.0 (for high-volume event tracking), The Guardian API (for high-quality historical articles), and Wikipedia’s Current Events Portal (for curated, notable event summaries).
+
+Phase 2: Text Preprocessing & Embedding: The collected titles and descriptions are cleaned, combined, and encoded into dense vector embeddings using the BAAI/bge-small-en-v1.5 model.
+
+Phase 3: Retrieval: User queries are embedded to find the most semantically relevant articles, with a specialized algorithm ensuring temporal diversity across different years.
+
+Phase 4: LLM Timeline Generation: A "Bouncer" LLM validates the query, followed by the primary LLM (GLM-4.5-air), which reads the retrieved articles and streams a chronologically formatted timeline to the frontend.
+
+Phase 5: Web UI: A Flask-based backend handles real-time Server-Sent Events (SSE) to display the timeline to the user seamlessly.
+
+
+
+Dataset Collection Pipeline (The Multi-Source Engine)
+Source 1: The Guardian API (Historical Depth)
+Leverages The Guardian's free API access to pull high-quality, professionally written historical news.
+Provides highly reliable, human-readable text with excellent chronological depth, serving as a strong backbone for the timeline's narrative.
+
+Source 2: Wikipedia Current Events Portal (Curated Notability)
+Extracts structured daily summaries from Wikipedia's Current Events portal.
+Ensures the dataset captures globally recognized, consensus-driven milestones, filtering out minor noise and focusing on high-notability events.
+
+Source 3: GDELT 2.0 (High-Volume Global Tracking)
+Optimized Ingestion: Downloads 15-minute time slices using connection pooling and concurrent threads (avoiding I/O bottlenecks by parsing ZIPs entirely in memory).
+Smart Filtering: Heavily filters events by duplicate IDs, minimum mention thresholds, and specific domain/actor keywords to remove obscure blog noise.
+Translates GDELT’s classification codes: Translates GDELT’s CAMEO classification codes (e.g., "112" for "Criticize") using a custom dictionary of 80+ templates (e.g., "{A1} accused {A2}").
+
+
+
+Information Retrieval Architecture
+Embedding Model: Uses BAAI/bge-small-en-v1.5 (a highly efficient, small-scale embedding model) to generate 384-dimensional vectors for millions of records.
+
+Query Transformation: Prepends the instruction "Represent this sentence for searching relevant passages: " to user queries to optimize the model's retrieval performance.
+
+Similarity Metric: Utilizes Cosine Similarity to find the closest matching news events.
+
+Temporal Diversification (Crucial for Timelines): Instead of just taking the absolute Top-K results (which might all be from the exact same week of a major news cycle), the retriever groups results by year. It pulls the highest-scoring articles from each available year, ensuring the LLM has context to build a long-term chronological timeline.
+
+
+
+LLM Integration (ZhipuAi GLM)
+The "Bouncer" Validation: Before doing heavy processing, a lightweight LLM prompt checks the user's query. It explicitly rejects gibberish, conversational chat, out-of-bounds dates, or non-news queries, ensuring system resources are only spent on valid topics.
+
+Primary Timeline Generation: The validated query and retrieved articles are fed into glm-4.5-air.
+
+Incremental JSON Streaming: Instead of making the user wait for the entire response to finish generating, the system uses a custom incremental JSON parser (stream_parsed_events). It tracks braces {} on the fly and yields individual timeline events the exact millisecond the LLM finishes typing them.
+
+
+
+Backend & Engineering Highlights
+Decoupled Background Jobs: The Flask backend (web/app.py) uses a threading model with a background job manager. If a user reloads the page or their browser disconnects, the LLM pipeline continues running in the background. Reconnecting will replay the history instantly.
+
+Server-Sent Events (SSE): Uses SSE to push progress updates, retrieval traces, and timeline events to the frontend in real-time.
+
+Concurrency Control: The server strictly enforces a MAX_CONCURRENT_JOBS limit to prevent LLM rate limits and out-of-memory crashes during high traffic.
+
+Action & Feedback Logging: Comprehensive file-based logging captures system latency (TTFT, TPS), query inputs, and user-submitted feedback for continuous improvement.
+
+
+
+
+

@@ -106,7 +106,10 @@ def run_background_pipeline(query, job, client_ip):
         log_event("INFO", "Bouncer validation completed", "run_background_pipeline:bouncer_preset_chat", ip=client_ip, perf_ms=(time.time() - bouncer_start) * 1000)
 
         if not bouncer_result.get("is_valid", False):
-            job['events'].append({'type': 'progress', 'message': bouncer_result.get('rejection_reason', 'Your query was rejected.')})
+            job['events'].append({
+                'type': 'bouncer_invalid',
+                'message': bouncer_result.get('rejection_reason', 'Your query was rejected.')
+            })
             job['status'] = 'completed'
             with job['condition']:
                 job['condition'].notify_all()

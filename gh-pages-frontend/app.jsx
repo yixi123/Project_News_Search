@@ -408,6 +408,7 @@ const App = () => {
   const [retrievalArticles, setRetrievalArticles] = useState(null);
   const [showRetrieval, setShowRetrieval] = useLocalStorage('newsTrace_showRetrieval', false);
   const [retrieverOnline, setRetrieverOnline] = useState(null);
+  const [isBouncerRejected, setIsBouncerRejected] = useState(false);
 
   const checkRetriever = async () => {
     try {
@@ -447,6 +448,7 @@ const App = () => {
       // Clear previous retrieval trace when starting a fresh search
       setRetrievalArticles(null);
       setShowRetrieval(false);
+      setIsBouncerRejected(false);
     }
     setIsTracing(true);
     setProgressMsg(isResume ? "Resuming trace..." : "Connecting to server...");
@@ -503,6 +505,9 @@ const App = () => {
               const data = JSON.parse(dataStr);
               if (data.type === "progress") {
                 setProgressMsg(data.message);
+              } else if (data.type === "bouncer_invalid") {
+                setIsBouncerRejected(true);
+                setProgressMsg(data.message || "Your query was rejected.");
               } else if (data.type === "retrieval") {
                 // Replace retrieval trace with fresh articles sorted by score
                 const articles = Array.isArray(data.articles) ? data.articles.slice().sort((a,b) => (b.score||0) - (a.score||0)) : [];
@@ -578,6 +583,7 @@ const App = () => {
     setError(null);
     setIsLoading(false);
     setIsTracing(false);
+    setIsBouncerRejected(false);
     setProgressMsg("Initializing trace...");
     setFeedbackStatus("");
     setIsFeedbackOpen(false);
@@ -603,14 +609,14 @@ const App = () => {
         </div>
       )}
       
-      {!isTracing && viewTimeline && !timeline && !isLoading && !error && (
+      {!isTracing && viewTimeline && (!timeline || timeline.length === 0) && !isLoading && !error && progressMsg === "Generating chronological timeline..." && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-violet-950/60 border border-violet-900 text-violet-200' : 'bg-purple-50 border border-purple-200 text-purple-800'}`}>
           <p className="font-semibold">⚠️ Timeline Cannot Be Generated</p>
           <p className="text-sm opacity-90">This query contains sensitive or geopolitical information that our LLM cannot process. Please try a different search topic.</p>
         </div>
       )}
       
-      {!isLoading && !timeline && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && !error && !(viewTimeline && !isTracing) && (
+      {!isLoading && (!timeline || timeline.length === 0) && progressMsg && progressMsg !== "Initializing trace..." && progressMsg !== "Connecting to server..." && progressMsg !== "Generating chronological timeline..." && !error && viewTimeline && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-amber-950/60 border border-amber-900 text-amber-200' : 'bg-orange-50 border border-orange-200 text-orange-800'}`}>
           <p className="font-semibold">Notice</p>
           <p className="text-sm opacity-90">{progressMsg}</p>
@@ -675,7 +681,7 @@ const App = () => {
             </div>
           )}
 
-          {timeline && timeline.length === 0 && (
+          {timeline && timeline.length === 0 && progressMsg !== "Generating chronological timeline..." && (
             <div className={`text-center py-20 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>No events found.</div>
           )}
 
