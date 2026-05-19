@@ -737,7 +737,7 @@ const App = () => {
                 <div className="p-4 text-sm text-slate-500">No sources available.</div>
               )}
               {retrievalArticles && retrievalArticles.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-3 pb-20">
                   {retrievalArticles.map((a, i) => (
                     <a key={i} href={a.url} target="_blank" rel="noreferrer" className="block p-3 rounded-xl hover:shadow-md transition-colors">
                       <div className="flex items-start justify-between gap-3">
