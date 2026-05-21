@@ -218,6 +218,13 @@ def get_news():
             yield "event: close\ndata: {}\n\n"
         return Response(reject_stream(), mimetype='text/event-stream')
 
+    # ensure query is english for better retrieval performance, since our retriever is based on English embeddings. Non-English queries often yield zero results which confuses users.
+    if any(ord(char) > 127 for char in query):
+        log_event("WARNING", "Non-English query received", "get_news", ip=client_ip)
+        def reject_stream():
+            yield f"data: {json.dumps({'type': 'progress', 'message': 'Please enter your query in English for better results.'})}\n\n"
+            yield "event: close\ndata: {}\n\n"
+        return Response(reject_stream(), mimetype='text/event-stream')
 
     log_event("INFO", f"Query searched: {query}", "get_news", ip=client_ip)
 
