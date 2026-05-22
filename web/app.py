@@ -82,7 +82,7 @@ def save_feedback_entry(payload, client_ip, user_agent):
 
     feedback_file = os.path.join(FEEDBACK_DIR, f"{datetime.now().strftime('%Y-%m-%d')}.jsonl")
     with open(feedback_file, "a", encoding="utf-8") as handle:
-        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        handle.write(json.dumps(record, ensure_ascii=False, indent=2) + "\n")
 
     return record
 

@@ -219,7 +219,7 @@ def glm_preset_chat(messages: list) -> dict:
                 parsed_data = json.load(f)
                 time.sleep(3)  # Simulate some latency
                 # Yield timeline events
-                for event in parsed_data.get("timeline", []):
+                for event in parsed_data.get("key_events", []):
                     yield event
                     
             # check the meta file for finish reason
