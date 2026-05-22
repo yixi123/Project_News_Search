@@ -666,10 +666,17 @@ const App = () => {
   }, [retrievalArticles, sortSourcesBy]);
 
   return (
-    <div 
-      className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}
-      style={{ backgroundImage: "url('/static/img/backgound.png')", backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center" }}
-    >
+    <div className={`min-h-screen flex flex-col relative transition-colors duration-500 pb-28 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+      {/* Light Mode Background */}
+      <div 
+        className="fixed inset-0 pointer-events-none transition-opacity duration-500 z-[-1]"
+        style={{ backgroundImage: "url('/static/img/background.png')", backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center", opacity: isDarkMode ? 0 : 1 }}
+      />
+      {/* Dark Mode Background */}
+      <div 
+        className="fixed inset-0 pointer-events-none transition-opacity duration-500 z-[-1]"
+        style={{ backgroundImage: "url('/static/img/background_dark.png')", backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center", opacity: isDarkMode ? 1 : 0 }}
+      />
       <SearchPanel query={query} setQuery={setQuery} onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
       
       {error && (
