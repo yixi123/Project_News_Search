@@ -401,7 +401,7 @@ const FeedbackPanel = ({ onSubmit, isSubmitting, status, onClose, isDarkMode }) 
 
 const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggleDarkMode, isHomeDisabled, onToggleRetrieval, showRetrieval, retrieverOnline }) => (
   <footer className={`fixed bottom-0 left-0 w-full border-t backdrop-blur-sm z-50 ${isDarkMode ? 'border-slate-800 bg-slate-950/80' : 'border-slate-200 bg-white/70'}`}>
-    <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4 text-sm text-slate-600">
+    <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center sm:justify-between gap-3 text-sm text-slate-600">
       <div className="flex items-center gap-3">
         <span className={`font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>NewsTrace</span>
         <div className="text-xs flex items-center gap-2">
@@ -409,7 +409,7 @@ const Footer = ({ onOpenFeedback, onNavigateHome, homeLabel, isDarkMode, onToggl
           <span className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{retrieverOnline ? 'Retriever online' : retrieverOnline === null ? 'Checking retriever...' : 'Retriever offline'}</span>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 justify-end">
         <button type="button" onClick={onToggleDarkMode} className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-white' : 'hover:text-slate-900'}`}>
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
         </button>

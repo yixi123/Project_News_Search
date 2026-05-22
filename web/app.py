@@ -14,7 +14,7 @@ from flask_cors import CORS
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from retriever import get_articles_from_query
-from LLM_GLM import bouncer_preset_chat, glm_preset_chat
+from LLM_DeepSeek import bouncer_preset_chat, deepseek_preset_chat
 from prompt import generate_full_prompt
 
 app = Flask(__name__)
@@ -150,23 +150,23 @@ def run_background_pipeline(query, job, client_ip):
         log_event("INFO", f"Message hash produced: {message_hash}", "run_background_pipeline", ip=client_ip)
         
         llm_start = time.time()
-        event_generator = glm_preset_chat(messages)
+        event_generator = deepseek_preset_chat(messages)
 
         for event in event_generator:
             job['events'].append(event)
             with job['condition']:
                 job['condition'].notify_all()
             if event.get("type") == "sensitive":
-                log_event("WARNING", f"Sensitive content detected from LLM for query '{query}'", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+                log_event("WARNING", f"Sensitive content detected from LLM for query '{query}'", "run_background_pipeline:deepseek_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
             
         job['status'] = 'completed'
         with job['condition']:
             job['condition'].notify_all()
             
-        if len(job['events']) < 5:
-            log_event("WARNING", f"Timeline generation completed but with very few events ({len(job['events'])}). Query: '{query}'", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+        if len(job['events']) <= 5:
+            log_event("WARNING", f"Timeline generation completed but with very few events ({len(job['events'])}). Query: '{query}'", "run_background_pipeline:deepseek_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
         else:
-            log_event("INFO", f"Timeline generation completed successfully, Query: '{query}', Total Events: {len(job['events'])}", "run_background_pipeline:glm_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
+            log_event("INFO", f"Timeline generation completed successfully, Query: '{query}', Total Events: {len(job['events'])}", "run_background_pipeline:deepseek_preset_chat", ip=client_ip, perf_ms=(time.time() - llm_start) * 1000)
         log_event("INFO", "Total job completed", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
 
     except Exception as e:
@@ -175,7 +175,7 @@ def run_background_pipeline(query, job, client_ip):
         
         log_event("ERROR", f"Error during processing: {error_str}", "run_background_pipeline", ip=client_ip, error=error_details, perf_ms=(time.time() - start_time) * 1000)
         
-        if "1301" in error_str or "敏感内容" in error_str:
+        if "1301" in error_str or "敏感内容" in error_str or "inappropriate content" in error_str:
             job['events'].append({'type': 'sensitive', 'message': 'Sensitive content detected.'})
             log_event("WARNING", f"Sensitive content detected from error for query '{query}'", "run_background_pipeline", ip=client_ip, perf_ms=(time.time() - start_time) * 1000)
         else:
