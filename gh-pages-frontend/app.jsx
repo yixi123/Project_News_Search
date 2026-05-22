@@ -666,7 +666,10 @@ const App = () => {
   }, [retrievalArticles, sortSourcesBy]);
 
   return (
-    <div className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+    <div 
+      className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}
+      style={{ backgroundImage: "url('/static/img/backgound.png')", backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center" }}
+    >
       <SearchPanel query={query} setQuery={setQuery} onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
       
       {error && (
