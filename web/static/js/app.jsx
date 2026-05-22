@@ -94,8 +94,7 @@ const ROTATING_PLACEHOLDERS = [
   "Silicon Valley Bank collapse"
 ];
 
-const SearchPanel = ({ onSearch, isLoading, isTracing, isDarkMode }) => {
-  const [query, setQuery] = useLocalStorage('newsTrace_query', '');
+const SearchPanel = ({ query, setQuery, onSearch, isLoading, isTracing, isDarkMode }) => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   useEffect(() => {
@@ -668,7 +667,7 @@ const App = () => {
 
   return (
     <div className={`min-h-screen flex flex-col relative transition-colors duration-300 pb-28 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-      <SearchPanel onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
+      <SearchPanel query={query} setQuery={setQuery} onSearch={handleSearch} isLoading={isLoading} isTracing={isTracing} isDarkMode={isDarkMode} />
       
       {error && (
         <div className={`max-w-4xl mx-auto mt-8 p-4 rounded-xl shadow-sm text-center ${isDarkMode ? 'bg-rose-950/60 border border-rose-900 text-rose-200' : 'bg-red-50 border border-red-200 text-red-700'}`}>
@@ -739,6 +738,23 @@ const App = () => {
                 Generation takes approx. 1 minute.
               </div>
             </div>
+
+            {/* Try This section */}
+            <div className={`mt-10 pt-8 border-t flex flex-col items-center justify-center gap-4 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+              <span className={`text-sm font-semibold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Try tracing events</span>
+              <div className="flex flex-wrap justify-center gap-2">
+                {["OpenAI", "SpaceX launches", "Global chip shortage", "Brexit negotiations", "Covid-19 pandemic"].map((q) => (
+                  <button 
+                    key={q}
+                    onClick={() => handleSearch(q)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300'}`}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
           </div>
         </div>
       )}
