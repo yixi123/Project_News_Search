@@ -78,8 +78,32 @@ const ChevronIcon = ({ open }) => (
 
 // --- COMPONENTS ---
 
+const ROTATING_PLACEHOLDERS = [
+  "OpenAI",
+  "SpaceX launches",
+  "AI regulations in 2023",
+  "Global chip shortage",
+  "Covid-19 pandemic",
+  "Brexit negotiations",
+  "Paris Climate Agreement",
+  "US Presidential Election 2020",
+  "Elon Musk Twitter acquisition",
+  "UK Prime Minister changes",
+  "Suez Canal blockage",
+  "Boeing 737 MAX grounding",
+  "Silicon Valley Bank collapse"
+];
+
 const SearchPanel = ({ onSearch, isLoading, isTracing, isDarkMode }) => {
   const [query, setQuery] = useLocalStorage('newsTrace_query', '');
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % ROTATING_PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -102,7 +126,7 @@ const SearchPanel = ({ onSearch, isLoading, isTracing, isDarkMode }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               disabled={isLoading}
-              placeholder="Search chronological timeline..."
+              placeholder={ROTATING_PLACEHOLDERS[placeholderIndex]}
               className={`w-full pl-12 pr-4 py-3 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all disabled:opacity-50 ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-400 disabled:bg-slate-800' : 'bg-white border-slate-200 disabled:bg-slate-100'}`}
             />
             <button 

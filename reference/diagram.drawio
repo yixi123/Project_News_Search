@@ -1,19 +1,19 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Page-1" id="_7T7Am4Yc0mlJRqRcWDI">
-    <mxGraphModel dx="2188" dy="-1974" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1823" dy="-2195" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="BYxuQgaAzV456OVLNXek-1" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Ingestion Tier (Offline Pipelines)" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-1" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);verticalAlign=top;" value="Ingestion Tier (Offline Pipelines)" vertex="1">
           <mxGeometry height="457" width="329" x="20" y="4380" as="geometry" />
         </mxCell>
-        <mxCell id="BYxuQgaAzV456OVLNXek-2" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Storage Tier" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-2" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);align=center;verticalAlign=top;" value="Storage" vertex="1">
           <mxGeometry height="158" width="1706" x="67" y="4935" as="geometry" />
         </mxCell>
-        <mxCell id="BYxuQgaAzV456OVLNXek-3" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Runtime Tier (Flask Backend &amp; AI)" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-3" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);verticalAlign=top;" value="Runtime Tier (Flask Backend &amp; AI)" vertex="1">
           <mxGeometry height="280" width="917" x="369" y="4557" as="geometry" />
         </mxCell>
-        <mxCell id="BYxuQgaAzV456OVLNXek-4" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Frontend Tier (React)" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-4" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);verticalAlign=top;" value="Frontend Tier (React)" vertex="1">
           <mxGeometry height="457" width="536" x="1306" y="4380" as="geometry" />
         </mxCell>
         <mxCell id="BYxuQgaAzV456OVLNXek-5" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Search Interface" vertex="1">
@@ -34,10 +34,10 @@
         <mxCell id="BYxuQgaAzV456OVLNXek-10" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="LLM Pipeline (Bouncer &amp; GLM-4.5)" vertex="1">
           <mxGeometry height="78" width="260" x="714" y="4734" as="geometry" />
         </mxCell>
-        <mxCell id="BYxuQgaAzV456OVLNXek-11" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;strokeWidth=2;whiteSpace=wrap;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="News &amp;amp; Vector Database &#xa;(all_news.csv, .npy)" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-11" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;strokeWidth=2;whiteSpace=wrap;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="News; Vector Database &#xa;(all_news.csv, .npy)" vertex="1">
           <mxGeometry height="108" width="190" x="232" y="4960" as="geometry" />
         </mxCell>
-        <mxCell id="BYxuQgaAzV456OVLNXek-12" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;strokeWidth=2;whiteSpace=wrap;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Prompt &amp;amp; Output Cache &#xa;(JSON Hash Maps)" vertex="1">
+        <mxCell id="BYxuQgaAzV456OVLNXek-12" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;strokeWidth=2;whiteSpace=wrap;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Prompt; Output Cache &#xa;(JSON Hash Maps)" vertex="1">
           <mxGeometry height="108" width="186" x="751" y="4960" as="geometry" />
         </mxCell>
         <mxCell id="BYxuQgaAzV456OVLNXek-13" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;strokeWidth=2;whiteSpace=wrap;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Action &amp; Feedback Logs" vertex="1">
