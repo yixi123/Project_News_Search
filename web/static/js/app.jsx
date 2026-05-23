@@ -442,6 +442,7 @@ const App = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('newsTrace_isDarkMode', false);
   const [retrievalArticles, setRetrievalArticles] = useState(null);
   const [showRetrieval, setShowRetrieval] = useLocalStorage('newsTrace_showRetrieval', false);
+  const [orderNewestFirst, setOrderNewestFirst] = useLocalStorage('newsTrace_orderNewest', true);
   const [retrieverOnline, setRetrieverOnline] = useState(null);
   const [isBouncerRejected, setIsBouncerRejected] = useState(false);
   const [isSensitive, setIsSensitive] = useState(false);
@@ -665,6 +666,11 @@ const App = () => {
     });
   }, [retrievalArticles, sortSourcesBy]);
 
+  const displayedTimeline = useMemo(() => {
+    if (!Array.isArray(timeline)) return [];
+    return orderNewestFirst ? [...timeline].reverse() : timeline;
+  }, [timeline, orderNewestFirst]);
+
   return (
     <div className={`min-h-screen flex flex-col relative transition-colors duration-500 pb-28 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
       {/* Light Mode Background */}
@@ -778,8 +784,19 @@ const App = () => {
         <main className="flex-1 flex flex-col pt-10">
           {viewTimeline && timeline && timeline.length > 0 && (
             <div id="timeline" className="scroll-mt-24">
-              <TimelineSummary timeline={timeline} isDarkMode={isDarkMode} />
-              <TimelineFeed timeline={timeline} isDarkMode={isDarkMode} />
+              <div className="max-w-5xl mx-auto px-4 flex justify-end mt-4 -mb-2">
+                <button 
+                  onClick={() => setOrderNewestFirst(prev => !prev)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-sm'}`}
+                >
+                  <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${orderNewestFirst ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                  </svg>
+                  {orderNewestFirst ? 'Newest First' : 'Oldest First'}
+                </button>
+              </div>
+              <TimelineSummary timeline={displayedTimeline} isDarkMode={isDarkMode} />
+              <TimelineFeed timeline={displayedTimeline} isDarkMode={isDarkMode} />
             </div>
           )}
 
