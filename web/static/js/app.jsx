@@ -842,7 +842,7 @@ const App = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: 'tween', duration: 0.25 }}
-            className={`fixed right-4 top-20 bottom-4 w-96 z-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
+            className={`fixed left-2 right-2 top-20 bottom-4 sm:left-auto sm:right-4 sm:w-96 z-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-white border border-slate-100 text-slate-900'}`}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{borderColor: isDarkMode ? 'rgba(148,163,184,0.06)' : 'rgba(2,6,23,0.04)'}}>
               <div className="font-semibold">View Sources</div>
